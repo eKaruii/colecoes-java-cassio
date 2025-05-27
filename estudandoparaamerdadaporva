@@ -1,0 +1,538 @@
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        // CATEGORIAS
+        Categoria categoriaLivro = new Categoria("Literatura", "Livros de ficção e não ficção");
+        Categoria categoriaJogo = new Categoria("Games", "Jogos para diversas plataformas");
+
+        // AUTORES
+        Autor autor1 = new Autor("Machado de Assis", "Brasileiro", "machado@email.com");
+        Autor autor2 = new Autor("J.K. Rowling", "Britânica", "jk@email.com");
+
+        // EDITORAS
+        Editora editora1 = new Editora("Companhia das Letras", "Brasileira", "contato@companhia.com", "São Paulo");
+        Editora editora2 = new Editora("Bloomsbury", "Britânica", "contato@bloomsbury.com", "Londres");
+
+        // FUNCIONÁRIO
+        Funcionario funcionario = new Funcionario("F001", "Ana", "ana@email.com", "11999999999", "Gerente", 5000);
+
+        // CADASTRAR PRODUTOS
+
+        // Livros Nacionais
+        funcionario.cadastrarLivroNacional("L001", 59.90, "Dom Casmurro", categoriaLivro, autor1, editora1, 300, 10);
+        funcionario.cadastrarLivroNacional("L002", 49.90, "Memórias Póstumas", categoriaLivro, autor1, editora1, 280, 5);
+
+        // Livros Estrangeiros
+        funcionario.cadastrarLivroEstrangeiro("LE001", 79.90, "Harry Potter e a Pedra Filosofal", categoriaLivro, autor2, editora2, 350, "Inglês", "Reino Unido", 7);
+        funcionario.cadastrarLivroEstrangeiro("LE002", 89.90, "Harry Potter e a Câmara Secreta", categoriaLivro, autor2, editora2, 400, "Inglês", "Reino Unido", 6);
+
+        // EBooks
+        funcionario.cadastrarEBooks("E001", 39.90, "Dom Casmurro (Ebook)", categoriaLivro, autor1, editora1, 300, "PDF", 10);
+        funcionario.cadastrarEBooks("E002", 44.90, "Harry Potter e a Pedra Filosofal (Ebook)", categoriaLivro, autor2, editora2, 350, "ePub", 5);
+
+        // Quadrinhos
+        funcionario.cadastrarQuadrinho("Q001", 29.90, "Turma da Mônica", categoriaLivro, autor1, editora1, 100, "Mauricio de Sousa", "Brasil", 1, 8);
+        funcionario.cadastrarQuadrinho("Q002", 34.90, "Marvel - Guerra Civil", categoriaLivro, autor2, editora2, 150, "Steve McNiven", "EUA", 2, 5);
+
+        // Jogos Físicos
+        funcionario.cadastrarJogoFisico("J001", 199.90, "FIFA 24", categoriaJogo, "PS5", "Esporte", "Blu-ray", 4);
+        funcionario.cadastrarJogoFisico("J002", 249.90, "The Last of Us Part II", categoriaJogo, "PS5", "Aventura", "Blu-ray", 3);
+
+        // Jogos Online
+        funcionario.cadastrarJogoOnline("JO001", 149.90, "Minecraft", categoriaJogo, "PC", "Sandbox", 1.5);
+        funcionario.cadastrarJogoOnline("JO002", 119.90, "Valorant", categoriaJogo, "PC", "FPS", 2.0);
+
+        // MOSTRAR ESTOQUE
+        funcionario.mostrarEstoque();
+
+        // APLICANDO PROMOÇÃO EM LIVROS E EBOOKS
+        LivroNacional livroNacional = (LivroNacional) Funcionario.estoque.get("L001");
+        livroNacional.setDesconto(15); 
+        livroNacional.aplicarPromocao();
+
+        EBooks ebook = (EBooks) Funcionario.estoque.get("E001");
+        ebook.setDesconto(20);
+        ebook.aplicarPromocao();
+
+        // CRIAR CLIENTE
+        Cliente cliente1 = new Cliente("C001", "Lucas", "lucas@email.com", "11988887777", "Rua das Flores, 123");
+        Cliente cliente2 = new Cliente("C002", "Mariana", "mariana@email.com", "11977776666", "Avenida Paulista, 456");
+
+        // CLIENTE REALIZANDO COMPRAS
+        cliente1.comprarProduto("L001"); // Livro Nacional
+        cliente1.comprarProduto("JO001"); // Jogo Online
+        cliente1.comprarProduto("E002"); // Ebook
+
+        cliente2.comprarProduto("Q001"); // Quadrinho
+        cliente2.comprarProduto("J001"); // Jogo Físico
+        cliente2.comprarProduto("LE001"); // Livro Estrangeiro
+
+        // BAIXAR PRODUTOS DIGITAIS
+        JogoOnline jogoOnline = (JogoOnline) Funcionario.estoque.get("JO001");
+        jogoOnline.baixar();
+
+        ebook.baixar();
+
+        // MOSTRAR LIVROS DOS AUTORES
+        autor1.mostrarLivros();
+        autor2.mostrarLivros();
+
+        // MOSTRAR LIVROS DAS EDITORAS
+        editora1.mostrarLivros();
+        editora2.mostrarLivros();
+
+        // MOSTRAR ESTOQUE ATUALIZADO APÓS COMPRAS
+        funcionario.mostrarEstoque();
+    }
+}
+
+
+public interface Digital {
+    public void baixar();
+}
+
+public interface Promocional {
+    public void setDesconto(double desconto);
+    public void aplicarPromocao();
+}
+
+public interface ProdutoFisico {
+    public int getQuantEstoque();
+    public void setQuantEstoque(int quantEstoque);
+}
+
+
+public abstract class Produto {
+    private String idProduto;
+    private double preco;
+    private String nome;
+    private Categoria categoria;
+    
+    public Produto(String idProduto, double preco, String nome, Categoria categoria) {
+        this.idProduto = idProduto;
+        this.preco = preco;
+        this.nome = nome;
+        this.categoria = categoria;
+    }
+    
+    public String getIdProduto() {
+        return idProduto;
+    }
+    
+    public double getPreco() {
+        return preco;
+    }
+    
+    public String getNome(){
+        return nome;
+    }
+    
+}
+
+public abstract class Livro extends Produto {
+    private Autor autor;
+    private Editora editora;
+    private int quantPagina;
+    
+    public Livro(String idProduto, double preco, String nome, Categoria categoria, 
+                 Autor autor, Editora editora, int quantPagina) {
+        super(idProduto, preco, nome, categoria);
+        this.autor = autor;
+        this.editora = editora;
+        this.quantPagina = quantPagina;
+        
+        autor.adicionarLivro(this);
+        editora.adicionarLivro(this);
+    }
+    
+}
+
+public class LivroNacional extends Livro implements ProdutoFisico, Promocional {
+    private static double desconto;
+    private int quantEstoque;
+    
+    public LivroNacional(String idProduto, double preco, String nome, Categoria categoria,
+                          Autor autor, Editora editora, int quantPagina, int quantEstoque) {
+        super(idProduto, preco, nome, categoria, autor, editora, quantPagina);
+        this.quantEstoque = quantEstoque;
+    }
+    
+    @Override
+    public int getQuantEstoque() {
+        return quantEstoque;
+    }
+    
+    @Override
+    public void setQuantEstoque(int quantEstoque) {
+        this.quantEstoque = quantEstoque;
+    }
+    
+    @Override
+    public void setDesconto(double desconto) {
+        this.desconto = desconto;
+    }    
+
+    
+    @Override
+    public void aplicarPromocao() {
+        double precoComDesconto = super.getPreco() - (super.getPreco() * desconto / 100);
+        System.out.println("Aplicando promoção no Livro" + super.getIdProduto() + "\n" +
+                            "Valor original: " + super.getPreco() + "\n" +
+                            "Valor com desconto: " + precoComDesconto);
+    }
+    
+}
+
+public class LivroEstrangeiro extends Livro implements ProdutoFisico{
+    private String idiomaOriginal;
+    private String paisOrigem;
+    private int quantEstoque;
+    
+    public LivroEstrangeiro(String idProduto, double preco, String nome, Categoria categoria,
+                             Autor autor, Editora editora, int quantPagina,
+                             String idiomaOriginal, String paisOrigem, int quantEstoque) {
+        super(idProduto, preco, nome, categoria, autor, editora, quantPagina);
+        this.idiomaOriginal = idiomaOriginal;
+        this.paisOrigem = paisOrigem;
+        this.quantEstoque = quantEstoque;
+    }
+    @Override
+    public int getQuantEstoque() {
+        return quantEstoque;
+    }
+    
+    @Override
+    public void setQuantEstoque(int quantEstoque) {
+        this.quantEstoque = quantEstoque;
+    }    
+    
+}
+
+public class EBooks extends Livro implements Digital, Promocional {
+    private String formatoArquivo;
+    private double desconto;
+    
+    public EBooks(String idProduto, double preco, String nome, Categoria categoria,
+                  Autor autor, Editora editora, int quantPagina,
+                  String formatoArquivo, double desconto) {
+        super(idProduto, preco, nome, categoria, autor, editora, quantPagina);
+        this.formatoArquivo = formatoArquivo;
+        this.desconto = desconto;
+    }
+    
+    @Override
+    public void aplicarPromocao() {
+        double precoComDesconto = super.getPreco() - (super.getPreco() * desconto / 100);
+        System.out.println("Aplicando promoção no EBook " + super.getIdProduto() + "\n" +
+                            "Valor original: " + super.getPreco() + "\n" +
+                            "Valor com desconto: " + precoComDesconto);
+    }
+    
+    @Override
+    public void setDesconto(double desconto) {
+        this.desconto = desconto;
+    }        
+    
+    @Override
+    public void baixar() {
+        System.out.println("Baixando " + super.getNome());
+    }
+    
+}
+
+public class Quadrinho extends Livro implements ProdutoFisico{
+    private String ilustrador;
+    private String paisOrigem;
+    private int volume;
+    private int quantEstoque;
+    
+    public Quadrinho(String idProduto, double preco, String nome, Categoria categoria,
+                     Autor autor, Editora editora, int quantPagina,
+                     String ilustrador, String paisOrigem, int volume, int quantEstoque) {
+        super(idProduto, preco, nome, categoria, autor, editora, quantPagina);
+        this.ilustrador = ilustrador;
+        this.paisOrigem = paisOrigem;
+        this.volume = volume;
+        this.quantEstoque = quantEstoque;
+    }
+    @Override
+    public int getQuantEstoque() {
+        return quantEstoque;
+    }
+    
+    @Override
+    public void setQuantEstoque(int quantEstoque) {
+        this.quantEstoque = quantEstoque;
+    }    
+    
+}
+
+public abstract class Jogo extends Produto {
+    private String plataforma;
+    private String genero;
+    
+    public Jogo(String idProduto, double preco, String nome, Categoria categoria,
+                String plataforma, String genero) {
+        super(idProduto, preco, nome, categoria);
+        this.plataforma = plataforma;
+        this.genero = genero;
+    }
+}
+
+public class JogoFisico extends Jogo implements ProdutoFisico{
+    private String tipoMidia;
+    private int quantEstoque;
+    
+    public JogoFisico(String idProduto, double preco, String nome, Categoria categoria,
+                       String plataforma,String genero,String tipoMidia,int quantEstoque) {
+        super(idProduto, preco, nome, categoria, plataforma, genero);
+        this.tipoMidia = tipoMidia;
+        this.quantEstoque = quantEstoque;
+    }
+    
+    @Override
+    public int getQuantEstoque() {
+        return quantEstoque;
+    }
+    
+    @Override
+    public void setQuantEstoque(int quantEstoque) {
+        this.quantEstoque = quantEstoque;
+    }    
+}
+
+public class JogoOnline extends Jogo implements Digital {
+    private double tamanhoGB;
+    
+    public JogoOnline(String idProduto, double preco, String nome, Categoria categoria,
+                       String plataforma, String genero, double tamanhoGB) {
+        super(idProduto, preco, nome, categoria, plataforma, genero);
+        this.tamanhoGB = tamanhoGB;
+    }
+    
+    @Override
+    public void baixar() {
+        System.out.println("Baixando jogo: " + super.getNome());
+    }
+    
+    
+    
+}
+
+
+public class Autor {
+    private String nome;
+    private String nacionalidade;
+    private String contato;
+    private List<Livro> livros;
+    
+    public Autor(String nome, String nacionalidade, String contato) {
+        this.nome = nome;
+        this.nacionalidade = nacionalidade;
+        this.contato = contato;
+        this.livros = new ArrayList<>();
+        
+    }
+    
+    public void adicionarLivro(Livro livro) {
+        livros.add(livro);
+    }
+    
+    public void mostrarLivros() {
+        System.out.println("Livros do autor " + nome + ":");
+        for (Livro livro : livros) {
+            System.out.println("- " + livro.getNome() + " | Preço: R$" + livro.getPreco());
+        }
+    }
+}
+
+public class Editora {
+    private String nome;
+    private String nacionalidade;
+    private String contato;
+    private String endereco;
+    private List<Livro> livros;
+    
+    public Editora(String nome,String nacionalidade,String contato,String endereco) {
+        this.nome = nome;
+        this.nacionalidade = nacionalidade;
+        this.contato = contato;
+        this.endereco = endereco;
+        this.livros = new ArrayList<>();
+    }
+    
+    public void adicionarLivro(Livro livro) {
+        livros.add(livro);
+    }
+    
+    public void mostrarLivros() {
+        System.out.println("Livros da editora " + nome + ":");
+        for (Livro livro : livros) {
+            System.out.println("- " + livro.getNome() + " | Preço: R$" + livro.getPreco());
+        }
+    }
+    
+}
+
+public class Categoria {
+    private String nome;
+    private String descricao;
+    public Categoria(String nome, String descricao) {
+        this.nome = nome;
+        this.descricao = descricao;
+    }
+}
+
+public class Usuario {
+    private String idUsuario;
+    private String nome;
+    private String email;
+    private String telefone;
+    
+    public Usuario(String idUsuario, String nome, String email, String telefone) {
+        this.idUsuario = idUsuario;
+        this.nome = nome;
+        this.email = email;
+        this.telefone = telefone;
+    }
+
+}
+
+public class Cliente extends Usuario {
+    private String endereco;
+    private List<Produto> itensComprados;
+    
+    public Cliente(String idUsuario, String nome, String email, String telefone,
+                   String endereco) {
+        super(idUsuario, nome, email, telefone);
+        this.endereco = endereco;
+        this.itensComprados = new ArrayList<>();
+    }
+    
+    public void comprarProduto(String idProduto) {
+
+        Produto produto = Funcionario.estoque.get(idProduto);
+        
+        if (produto == null) {
+            System.out.println("Produto não encontrado no estoque.");
+            return;
+            
+        }else if (produto instanceof ProdutoFisico) {
+            ProdutoFisico produtoFisico = (ProdutoFisico) produto;
+            if (produtoFisico.getQuantEstoque() > 0) {
+                produtoFisico.setQuantEstoque(produtoFisico.getQuantEstoque() - 1);
+                itensComprados.add(produto);
+                System.out.println("Compra realizada com sucesso.");
+                if (produtoFisico.getQuantEstoque() == 0) {
+                    Funcionario.estoque.remove(idProduto);
+                }
+            } else {
+                System.out.println("Produto indisponível.");
+            }
+        } 
+        else {
+            itensComprados.add(produto);
+            System.out.println("Compra realizada com sucesso (Produto digital).");
+        }
+        
+    }
+
+}
+
+
+public class Funcionario extends Usuario {
+    private String cargo;
+    private double salario;
+    public static Map<String, Produto> estoque = new HashMap<>();
+    
+    public Funcionario(String idUsuario, String nome, String email, String telefone,
+                        String cargo, double salario) {
+        super(idUsuario, nome, email, telefone);
+        this.cargo = cargo;
+        this.salario = salario;
+    }
+    
+    public void adicionarProduto(Produto produto){
+        estoque.put(produto.getIdProduto(), produto);
+    }
+    
+    public void removerProduto(String idProduto) {
+        estoque.remove(idProduto);
+    }
+
+    
+    public void cadastrarLivroNacional(String idProduto, double preco, String nome, Categoria categoria,
+                                      Autor autor, Editora editora, int quantPagina, int quantEstoque) {
+        LivroNacional livro = new LivroNacional(idProduto, preco, nome, categoria, autor, editora, quantPagina, quantEstoque);
+        adicionarProduto(livro);
+    }
+
+    public void cadastrarLivroEstrangeiro(String idProduto, double preco, String nome, Categoria categoria,
+                                         Autor autor, Editora editora, int quantPagina,
+                                         String idiomaOriginal, String paisOrigem, int quantEstoque) {
+        LivroEstrangeiro livro = new LivroEstrangeiro(idProduto, preco, nome, categoria, autor, editora, quantPagina,
+                                                     idiomaOriginal, paisOrigem, quantEstoque);
+        adicionarProduto(livro);
+    }
+
+    public void cadastrarEBooks(String idProduto, double preco, String nome, Categoria categoria,
+                                Autor autor, Editora editora, int quantPagina,
+                                String formatoArquivo, double desconto) {
+        EBooks ebook = new EBooks(idProduto, preco, nome, categoria, autor, editora, quantPagina, formatoArquivo, desconto);
+        adicionarProduto(ebook);
+    }
+
+    public void cadastrarQuadrinho(String idProduto, double preco, String nome, Categoria categoria,
+                                  Autor autor, Editora editora, int quantPagina,
+                                  String ilustrador, String paisOrigem, int volume, int quantEstoque) {
+        Quadrinho quadrinho = new Quadrinho(idProduto, preco, nome, categoria, autor, editora, quantPagina,
+                                            ilustrador, paisOrigem, volume, quantEstoque);
+        adicionarProduto(quadrinho);
+    }
+
+    public void cadastrarJogoFisico(String idProduto, double preco, String nome, Categoria categoria,
+                                    String plataforma, String genero, String tipoMidia, int quantEstoque) {
+        JogoFisico jogoFisico = new JogoFisico(idProduto, preco, nome, categoria, plataforma, genero, tipoMidia, quantEstoque);
+        adicionarProduto(jogoFisico);
+    }
+
+    public void cadastrarJogoOnline(String idProduto, double preco, String nome, Categoria categoria,
+                                    String plataforma, String genero, double tamanhoGB) {
+        JogoOnline jogoOnline = new JogoOnline(idProduto, preco, nome, categoria, plataforma, genero, tamanhoGB);
+        adicionarProduto(jogoOnline);
+    }
+    
+    
+    
+    
+    
+    public final void mostrarEstoque() {
+        System.out.println("=== Estoque de Produtos ===");
+        for (Map.Entry<String, Produto> entry : estoque.entrySet()) {
+            Produto produto = entry.getValue();
+            String nomeProduto = produto.getNome();
+            String classeProduto = produto.getClass().getSimpleName();
+            double preco = produto.getPreco();
+
+            System.out.print(nomeProduto + "\n" +
+                            " Tipo: " + classeProduto + "\n" +
+                            " Preço: R$" + preco + "\n");
+
+            if (produto instanceof ProdutoFisico) {
+                ProdutoFisico fisico = (ProdutoFisico) produto;
+                System.out.print("Quantidade em estoque: " + fisico.getQuantEstoque() + "\n");
+            }
+        }
+    }
+    
+}
+
+
+
+
